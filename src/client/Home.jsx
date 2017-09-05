@@ -52,7 +52,6 @@ class Home extends React.Component {
         <li key={map._id}>
           <Link to={`/canvas/${map._id}`}>{map.name}</Link>
           <button className="destroyMap" onClick={()=>{this.destroyMap(map._id)}}>Delete This Map</button>
-
         </li>
         )
     })

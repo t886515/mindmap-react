@@ -3,62 +3,66 @@ import { Link, withRouter } from 'react-router-dom';
 import TestMap from './TestMap.jsx';
 import MapModel from './actions/maps';
 
+// [
+//           {
+//             name: 'Parent 1st tier',
+//             attributes: {
+//             },
+//             children: [
+//               {
+//                 name: 'Child 2nd tier',
+//                 attributes: {
+//                   keyA: 'val A',
+//                   keyB: 'val B',
+//                   keyC: 'val C',
+//                 },
+//                 children: [
+//                   {
+//                     name: '3rd tier',
+//                   },
+//                   {
+//                     name: '3rd tier 2',
+//                   },
+//                 ],
+//               },
+//               {
+//                 name: 'Child2 2nd tier',
+//                 children: [
+//                   {
+//                     name: 'child2 3rd tier',
+//                     children: [
+//                       {
+//                         name: 'child2 4th tier'
+//                       }
+//                     ],
+//                   },
+//                   {
+//                     name: 'child2 3rd tier 2'
+//                   }
+//                 ],
+//               },
+//             ],
+//           }, 
+//         ]
 
 class Canvas extends React.Component {
   constructor(props) {
     super(props)
       this.state = {
         map: { name: 'random', tree: {}},
-        tree: [
-          {
-            name: 'Parent 1st tier',
-            attributes: {
-            },
-            children: [
-              {
-                name: 'Child 2nd tier',
-                attributes: {
-                  keyA: 'val A',
-                  keyB: 'val B',
-                  keyC: 'val C',
-                },
-                children: [
-                  {
-                    name: '3rd tier',
-                  },
-                  {
-                    name: '3rd tier 2',
-                  },
-                ],
-              },
-              {
-                name: 'Child2 2nd tier',
-                children: [
-                  {
-                    name: 'child2 3rd tier',
-                    children: [
-                      {
-                        name: 'child2 4th tier'
-                      }
-                    ],
-                  },
-                  {
-                    name: 'child2 3rd tier 2'
-                  }
-                ],
-              },
-            ],
-          }, 
-        ],
+        tree: [{name: 'startup', children: [ {name: '2nd', children: [] } ]}], 
         mapName: 'random',
         editNameToggle: false,
-
-
+        toggleNodeNameChange: false,
     }
     this.updateMap = this.updateMap.bind(this);
     this.updateMapName = this.updateMapName.bind(this);
     this.toggleNameChange = this.toggleNameChange.bind(this);
     this.untoggleNameChange = this.untoggleNameChange.bind(this);
+  }
+
+  componentWillReceiveProps() {
+    this.updateMap();
   }
 
   componentDidMount() {
@@ -73,6 +77,10 @@ class Canvas extends React.Component {
       setState of the map
     */
 
+  }
+
+  toggleNodeNameChange() {
+    
   }
 
   toggleNameChange() {
@@ -93,14 +101,18 @@ class Canvas extends React.Component {
   
 
   async updateMap() {
-    console.log('if you see this, means entire map view should be rerendered')
+    // console.log('if you see this, means entire map view should be rerendered')
     let mapResponse = await MapModel.getMap(this.props.match.params.id);
-    // console.log(mapResponse)
+    //do something to prevent a problem where there's no tree retrieved from database
+    //if all noedes are removed?
     this.setState({
       map: mapResponse.map,
-      mapName: mapResponse.map.name
+      mapName: mapResponse.map.name,
+      tree: mapResponse.map.tree
     })
+    
      //  setState of the map, mapname, tree
+     // console.log(this.state.tree, 'fkdopsakf======check on this')
   }
 
   async updateMapName(mapName) {
@@ -110,30 +122,15 @@ class Canvas extends React.Component {
       
       
       await MapModel.editMapName(this.props.match.params.id, mapName);
-      
-      // console.log('update name to: ', mapName)
-      // this.setState({
-      //   mapName: mapName
-      // })
       this.updateMap();
       this.props.updateMaps();
     }
   }
 
-  // addNode() {
-
-  // }
-
-  // deleteNode() {
-
-  // }
-
-  // editNode() {
-
-  // }
 
 
   render() {
+    // console.log('canvas is rendered', this.state.tree)
     return (
       <div>
         The map being rendered is:
@@ -145,7 +142,7 @@ class Canvas extends React.Component {
               <input type="submit" value="update" style={{ visibility: 'hidden' }}/>
           </form>
         }
-        <TestMap tree={this.state.tree} updateMap={this.updateMap}></TestMap>
+        <TestMap tree={this.state.tree} updateMap={this.updateMap} mapId={this.props.match.params.id}></TestMap>
       </div>
       )
   }
